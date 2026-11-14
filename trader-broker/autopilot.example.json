@@ -1,0 +1,32 @@
+{
+  "budget": 55,
+  "cash_buffer_pct": 5,
+  "max_position_pct": 95,
+  "max_order_usd": 55,
+  "min_order_usd": 5,
+  "max_loss_per_trade_usd": 1.5,
+  "max_daily_loss_usd": 3,
+  "max_trades_per_day": 2,
+  "max_orders_per_day": 4,
+  "min_reward_risk": 1.0,
+  "require_stop": true,
+  "no_entries_before": "09:45",
+  "no_entries_after": "15:30",
+  "flat_by": "15:55",
+  "fractional": false,
+  "broker": "alpaca",
+  "paper": true,
+  "blocked": [],
+  "allow_options": false,
+  "allow_margin": false,
+  "allow_short": false,
+  "pdt_guard": false,
+  "autopilot": {
+    "watchlist": ["F", "SOFI", "PFE", "T", "AAL", "NIO", "SNAP", "RIVN", "INTC", "KMI"],
+    "stop": "or-mid",
+    "target": "1R",
+    "or_minutes": 15,
+    "fresh_minutes": 5,
+    "poll_seconds": 30
+  }
+}

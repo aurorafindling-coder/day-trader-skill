@@ -13,8 +13,9 @@ craziest one is the Time Machine: before you risk a dollar, it replays the
 rest of the session 10,000 times from the stock's own recent bars, plus every
 past day the same setup fired, and tells you the honest odds.
 
-And no trade goes through until you say yes. Nothing in this pack can place
-an order on its own. Paper trading is the default.
+And no real-money trade goes through until you say yes. The one thing that
+trades on its own is the autopilot, and it only trades an Alpaca paper account
+(play money). Paper trading is the default.
 
 > **Looking for the original Trader skill?** Copy an investor's 13F, the
 > stock screener, tax lots and rebalancing live in
@@ -120,6 +121,21 @@ An example, the trade in the reel: Tesla, Monday October 19 2026, real data.
 9. **`/trader-alerts`** rings on the stop, the target and at 3:55 PM to
    flatten whatever is still open.
 
+## Autopilot (paper only)
+
+Want to see what the rules do with nobody saying yes? `trader-broker/autopilot.py`
+runs the whole chain on its own, scanner to bracket order, on an **Alpaca paper
+account** and nothing else: the paper API is the only broker address in the
+file. Start from `trader-broker/autopilot.example.json` (sized for about 50
+euros: a $55 budget, $1.50 max loss a trade, $3 a day), replay it on past days
+first, then let it run for a few weeks and read `autopilot.py status`.
+`touch trader/STOP` stops new entries and closes what is open. Details in
+`trader-broker/SKILL.md`.
+
+On the reel's 59 TSLA sessions with the reel's limits, the replay takes the same
+33 trades the Time Machine's history finds (13 target, 15 stop, 5 flat by the
+close) and ends at -$14.24 on $5,000, before fees. A coin flip, as advertised.
+
 ## The tools
 
 All standard-library Python. The data tools read public endpoints and are
@@ -138,6 +154,8 @@ python3 trader-budget/size.py --write                                  # -> trad
 python3 trader-risk/check.py                                           # PASS / BLOCK per order
 python3 trader-broker/ticket.py show                                   # the tickets, READY or not
 python3 trader-alerts/alerts.py add --from-plan                        # stop, target, flat by close
+python3 trader-broker/autopilot.py replay --offline TSLA.json.gz        # the whole chain on past days, simulated
+python3 trader-broker/autopilot.py run                                 # the whole chain on its own, PAPER account only
 python3 trader-alerts/alerts.py check                                  # rings what hit, once
 python3 trader-analyst/facts.py TSLA                                   # quarters, growth, EPS
 python3 trader-pelosi/ptr.py index --member pelosi                     # her PTRs this year
@@ -159,16 +177,18 @@ arithmetic. It does not know your situation and it cannot see the future.
 Most people who day trade lose money. You can lose money. Decide for
 yourself, and talk to a licensed professional if you need advice.
 
-**No trade goes through until you say yes.** Only `/trader-broker` can lead to
+**No real-money trade goes through until you say yes.** Only `/trader-broker` can lead to
 an order, and only after `/trader-risk` passes that exact order and you type
-yes for it in the chat. Set your brokerage tool to "Needs approval" in Claude
+yes for it in the chat. The exception is the autopilot, which you start
+yourself and which trades a paper account only. Set your brokerage tool to "Needs approval" in Claude
 (Customize, Connectors, tool permissions), never "Always allow", so Claude's
 own "Allow once / Deny" card is a second check. No options, margin, short
 selling or leverage unless you turn them on.
 
 **Paper first.** `"paper": true` is the default in `config.example.json`, and
 Alpaca's MCP server defaults to its paper account. Keys live in environment
-variables, never in the chat.
+variables, never in the chat. The autopilot trades paper accounts only and cannot be pointed at a
+live one.
 
 **The Time Machine is a simulation, not a prediction.** It is built from the
 stock's own last 60 days of 5-minute bars. The future can do things those 60
@@ -206,7 +226,8 @@ trader-exit/        SKILL.md, exit.py
 trader-timemachine/ SKILL.md, timemachine.py
 trader-risk/        SKILL.md, check.py
 trader-budget/      SKILL.md, size.py, config.example.json, targets.example.json
-trader-broker/      SKILL.md, ticket.py, claude_desktop_config.example.json
+trader-broker/      SKILL.md, ticket.py, autopilot.py, autopilot.example.json,
+                    claude_desktop_config.example.json
 trader-alerts/      SKILL.md, alerts.py, alerts.example.json
 trader-analyst/     SKILL.md, facts.py, metrics.example.json
 trader-pelosi/      SKILL.md, ptr.py

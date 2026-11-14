@@ -120,4 +120,5 @@ so the summary read that 10-Q directly.
 
 Education and tooling, not financial advice. This skill only reads filings.
 Nothing places an order except `/trader-broker`, after `/trader-risk` passes
-and the user types an explicit yes for that order.
+and the user types an explicit yes for that order. The one exception is the
+autopilot (`trader-broker/autopilot.py`), which trades an Alpaca paper account only.

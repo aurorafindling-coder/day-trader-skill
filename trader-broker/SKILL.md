@@ -191,10 +191,53 @@ card reads "Claude wants to use Place stock order" with that JSON and two
 buttons: Allow once, Deny. Allow once sends it to the paper account. The
 `why` and the plan stay in the file; they are never sent.
 
+## Autopilot: paper trading without asking
+
+`autopilot.py` is for one job: letting the rules trade on their own, on play
+money, so the user can see how they do before risking a cent. It runs on the
+user's own computer (or a small server), not inside a chat.
+
+```bash
+cp "${CLAUDE_SKILL_DIR}/autopilot.example.json" trader/config.json   # then edit the watchlist
+export ALPACA_API_KEY=...  ALPACA_SECRET_KEY=...                     # PAPER keys, typed in the terminal
+python3 "${CLAUDE_SKILL_DIR}/autopilot.py" check                     # config + the paper account, no orders
+python3 "${CLAUDE_SKILL_DIR}/autopilot.py" replay --days 60          # first: the same rule on 60 past days
+python3 "${CLAUDE_SKILL_DIR}/autopilot.py" run                       # trade the paper account; Ctrl+C stops it
+python3 "${CLAUDE_SKILL_DIR}/autopilot.py" status                    # every trade, P&L, average R
+touch trader/STOP                                                    # kill switch: no new entries, flat now
+```
+
+What it does each 5-minute bar, from `no_entries_before` to `no_entries_after`:
+the opening-range breakout on each watchlist symbol (trader-entry), the
+stop and target (trader-exit, `or-mid` and `1R` by default), the size
+(trader-budget, from the budget plus the realized P&L, so losses shrink the
+next trade), the check (trader-risk). Only a PASS is sent, as one bracket
+order. One position at a time, long only, whole shares, flat by `flat_by`.
+Every step lands in `trader/state/autopilot.json`.
+
+The fences, all in the code and covered by tests:
+
+- The only broker address in the file is `https://paper-api.alpaca.markets`.
+  There is no flag, setting or variable that points it at a live account.
+- It refuses to start unless `"paper": true`, a stop is required, short,
+  margin and options are off, and the per-trade, daily-loss and trades-a-day
+  limits are set.
+- `autopilot.example.json` is sized for about 50 euros: a $55 budget, $1.50
+  max loss a trade, $3 a day, 2 trades a day, a watchlist of cheap, heavily
+  traded stocks. Anything one share of which costs more than the budget is
+  skipped with the reason.
+
+When helping the user with it: never ask for the keys in the chat, never
+change `PAPER_BASE`, and never present replay or paper results as a promise.
+A replay fills at the trigger bar's close and a stop at its price (or the
+open, past a gap); real fills, spreads and fees are worse. Going live is not
+something this program does.
+
 ## What it never does
 
 - Never places an order without all three gates, and never two orders on one yes.
-- Never places orders from a scheduled or background task: nobody is there to say yes.
+- Never places orders from a scheduled or background task: nobody is there to say yes. (The autopilot
+  below is a separate program the user starts by hand, and it trades a paper account only.)
 - Never asks for, reads, stores or repeats API keys or passwords.
 - Never switches `ALPACA_PAPER_TRADE` or `"paper"` to live. The user does that themselves.
 - Never calls `close_all_positions`, `cancel_all_orders`, option or crypto order tools on its own.
@@ -208,5 +251,7 @@ buttons: Allow once, Deny. Allow once sends it to the paper account. The
   passed that exact order today, the user typed an explicit yes for that one order in the chat, and the
   user clicked Allow once on Claude's own card because the order tool is set to "Needs approval"
   (Customize > Connectors > tool permissions). Never set an order tool to "Always allow".
+- The one exception is the autopilot (`trader-broker/autopilot.py`), which you start yourself: it places
+  orders without asking, on an Alpaca paper account only (play money). It has no way to reach a live account.
 - No options, margin, short selling or leverage unless the config allows it and the user confirms.
 - Broker keys live in environment variables or the Claude Desktop config, never in the chat.

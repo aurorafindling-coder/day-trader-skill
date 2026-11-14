@@ -151,6 +151,7 @@ does not click it or automate it. The route:
   the chat, AND the brokerage tool is set to "Needs approval" in Claude
   (Customize > Connectors > tool permissions) so Claude's own "Allow once /
   Deny" card appears too. Never "Always allow" an order tool.
+- The one exception is the autopilot (`trader-broker/autopilot.py`): it trades an Alpaca paper account only.
 - No options, margin, shorting or leverage unless the config allows it and
   the user confirms.
 - Congressional trades are PUBLIC disclosures filed up to 45 days after the

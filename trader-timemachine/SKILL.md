@@ -164,5 +164,7 @@ into the pool.
   passed that exact order today, the user typed an explicit yes for that one order in the chat, and the
   user clicked Allow once on Claude's own card because the order tool is set to "Needs approval"
   (Customize > Connectors > tool permissions). Never set an order tool to "Always allow".
+- The one exception is the autopilot (`trader-broker/autopilot.py`), which you start yourself: it places
+  orders without asking, on an Alpaca paper account only (play money). It has no way to reach a live account.
 - No options, margin, short selling or leverage unless the config allows it and the user confirms.
 - Broker keys live in environment variables or the Claude Desktop config, never in the chat.
